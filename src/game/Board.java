@@ -22,7 +22,9 @@ import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -46,6 +48,10 @@ public class Board extends JFrame{
 	private JButton columnGroupTestButton;
 	private JButton rowGroupTestButton;
 	private JButton solveButton;
+	private JTextField box1;
+	private JTextField box2;
+	private JTextField box3;
+	
 	
 	private int[][] gameState;
 	private HashMap<JFormattedTextField,Coordinate> dict;
@@ -142,6 +148,7 @@ public class Board extends JFrame{
 									int x = dict.get(field).getX();
 									int y = dict.get(field).getY();
 									gameState[x][y] = Integer.parseInt(field.getText());
+									if(isSolved(gameState))System.out.println("Solved");;
 								}
 							}
 
@@ -152,6 +159,7 @@ public class Board extends JFrame{
 									int x = dict.get(field).getX();
 									int y = dict.get(field).getY();
 									gameState[x][y] = Integer.parseInt(field.getText());
+									if(isSolved(gameState))System.out.println("Solved");;
 								}
 
 							}
@@ -188,62 +196,64 @@ public class Board extends JFrame{
 		buttonPanel.setBackground(new Color(240,240,255));
 		buttonPanel.setLayout(new FlowLayout());
 
-		rowTotalTestButton = new JButton("Check Row 0 sum") ;
-		rowTotalTestButton.addActionListener(e->{
-			getRowTotal(0);
-		});
 
-		columnTotalTestButton = new JButton("Check Column 0 sum") ;
-		columnTotalTestButton.addActionListener(e->{
-			getColumnTotal(0);
-		});
 
 		boxTotalTestButton = new JButton("Check Box 0 sum") ;
 		boxTotalTestButton.addActionListener(e->{
-			//getBoxTotal(0);
-			for(int i=0;i<9;i++) {
-				for(int j=0;j<9;j++) {
-					System.out.print(getBoxNo(i,j));
-				}
-				System.out.println();
-			}
+			int x = Integer.parseInt(box1.getText());
+			int y = Integer.parseInt(box2.getText());
+			
+			
+			
 		});
+					
 
 		//		columnGroupTestButton = new JButton("Check Col 4-6 repeat for 2");
 		//		columnGroupTestButton.addActionListener(e->{
 		//			System.out.println(checkColumnGroup(2,1));
 		//		});
 		//		
-		rowGroupTestButton= new JButton("Check Row 0-2 repeat for 1");
-		rowGroupTestButton.addActionListener(e->{
-			System.out.println(checkRowGroup(2,1));
-		});
 		
+		
+		box1 = new JTextField();
+		box2 = new JTextField();
+		box3 = new JTextField();
+			
+		
+		box1.setMinimumSize(new Dimension(100,100));
+		box2.setMinimumSize(new Dimension(100,100));
+		box1.setPreferredSize(new Dimension(30,30));
+		box2.setPreferredSize(new Dimension(30,30));
+		box3.setPreferredSize(new Dimension(30,30));
 		
 		solveButton = new JButton("Solve");
 		solveButton.addActionListener(e->{
-			solveSudoku(gameState);
+			if(solveSudoku(gameState)) {
+				JOptionPane.showMessageDialog(this,"Solved");
+				System.out.println("GameSolved = " + isSolved(gameState));
+			}
+			else {
+				JOptionPane.showMessageDialog(this,"Not Solvable");
+				createGameState();
+			}
 		});
 		
 		
 
 		//		buttonPanel.add(rowTotalTestButton);
 		//		buttonPanel.add(columnTotalTestButton);
+		
+		buttonPanel.add(box1);
+		buttonPanel.add(box2);
+		buttonPanel.add(box3);
 		buttonPanel.add(boxTotalTestButton);
 		buttonPanel.add(solveButton);
+		
 		//buttonPanel.add(columnGroupTestButton);
 		//		buttonPanel.add(rowGroupTestButton);
 	}
 
-	private int getBoxNo(int row,int col) {
-		
-		if(row<3) return (row/3 + (col/3));
-		if(row<6) return (row/3 + (col/3)+3*1 - 1);
-		if(row<9) return (row/3 + (col/3)+3*2 - 1);
-		
-		return 0;
-	}
-
+	
 	private boolean usedInRow(int[][] grid, int row,int value) {
 		for(int i=0;i<9;i++) {
 			if(grid[row][i] == value) return true;
@@ -259,130 +269,53 @@ public class Board extends JFrame{
 	}
 
 	
-
-	private boolean usedInBox(int[][] grid, int box,int value) {
-//		int x = (box % 3) * 3;
-//		int y = (box / 3) * 3;
-//		
-//		
-//		
-//		for(int i = x;i<x+3;i++) {
-//			for(int j = y;j<y+3;j++) {
-//				if(grid[i][j] == value) return true;
-//			}
-//		}
+	
+	private boolean usedInBox2(int[][] grid, int row,int col,int value) {
+		int x = 3 * (row/3);
+		int y = 3 * (col/3);
+		
+		for(int i=x;i<x+3;i++) {
+			for(int j=y;j<y+3;j++) {
+				if(grid[i][j]== value) return true;
+			}
+			
+		}
 		
 		return false;
 	}
 	
-	private boolean usedInBox2(int[][] grid, int row,int col,int value) {
-		int x = row/3;
-		int y = col/3;
-		
-		for(int i=x*3;i<(x*3)+3;i++) {
-			for(int j=y*3;j<(y*3);j++) {
-				if(grid[i][j]== value) return true;
+	private int getBoxSum(int grid[][], int row, int col) {
+		int x = 3 * (row/3);
+		int y = 3 * (col/3);
+		int sum=0;
+		for(int i=x;i<x+3;i++) {
+			for(int j=y;j<y+3;j++) {
+				sum += grid[i][j];
 			}
+			
 		}
 		
-		return false;
-	}
-
-
-	private int getColumnTotal(int column) {
-		int total=0;
-		for(int i=0;i<9;i++) {
-			total += gameState[i][column];
-		}
-		System.out.println(total);
-		return total;
-	}
-
-	private int getRowTotal(int row) {
-		int total=0;
-		for(int i=0;i<9;i++) {
-			total += gameState[row][i];
-		}
-		System.out.println(total);
-		return total;
-	}
-
-	private int getBoxTotal(int box) {
-		int x = (box % 3) * 3;
-		int y = (box / 3) * 3;
-		int sum = 0;
-		for(int i = x;i<x+3;i++) {
-			for(int j = y;j<y+3;j++) {
-				sum += gameState[i][j];
-			}
-		}
-		System.out.println("Sum = " + sum);
 		return sum;
 	}
 	
-	
-
-	private boolean checkColumnGroup(int columnGroup,int value) {
-		int total0 = 0;
-		int total1 = 0;
-		int total2 = 0;
-		for(int i = 0;i<9;i++) {
-			int temp = columnGroup* 3;
-			for(int j=temp;j<temp+3;j++) {
-				System.out.print(gameState[i][j] + " ");
-				if(j % 3== 0) {
-					if(gameState[i][j]==value) total0++;
-				}
-				else if(j % 3 == 1) {
-					if(gameState[i][j]==value) total1++;
-				}
-				else if(j % 3 == 2) {
-					if(gameState[i][j]==value) total2++;
-				}
-			}
-			System.out.println();
+	private int getRowSum(int grid[][],int row) {
+		int sum = 0;
+		for(int i=0;i<9;i++) {
+			sum += grid[row][i];
 		}
-		System.out.println("Repeat = "+ (total0 + total1 + total2));
-		System.out.println(total0);
-		System.out.println(total1);
-		System.out.println(total2);
-		if (total0 == 1 & total1 == 1 & total2 == 1) return true;
-		return false;
+		return sum;
 	}
 
-	private boolean checkRowGroup(int rowGroup,int value) {
-		int total0 = 0;
-		int total1 = 0;
-		int total2 = 0;
-		for(int i = (rowGroup*3);i<(rowGroup*3) + 3;i++) {
-			for(int j=0;j<9;j++) {
-				System.out.print(gameState[i][j] + " ");
-				if(i%3 == 0) {
-					if(gameState[i][j]==value) total0++;
-				}
-				else if(i%3 == 1) {
-					if(gameState[i][j]==value) total1++;
-				}
-				else if(i%3 == 2) {
-					if(gameState[i][j]==value) total2++;
-				}
-			}
-			System.out.println("");
+	private int getColumnSum(int grid[][],int col) {
+		int sum = 0;
+		for(int i=0;i<9;i++) {
+			sum +=grid[i][col];
 		}
-		System.out.println("Repeat = "+ (total0 + total1 + total2));
-		System.out.println(total0);
-		System.out.println(total1);
-		System.out.println(total2);
-		if (total0 == 1 & total1 == 1 & total2 == 1) return true;
-		return false;
+		return sum;
 	}
 
 
 	private boolean isSafe(int[][] grid,int row, int col, int num) {
-		System.out.println("UsedInRow: " + usedInRow(grid, row, num));
-		System.out.println("UsedInCol: " + usedInCol(grid, col, num));
-		System.out.println("Box No: " + getBoxNo(row,col));
-		System.out.println("UsedInBox: " + usedInBox(grid, getBoxNo(row,col), num));
 		return !usedInRow(grid, row, num) &&
 				!usedInCol(grid, col, num) &&
 				!usedInBox2(grid, row,col,num);
@@ -472,25 +405,70 @@ public class Board extends JFrame{
 //				}
 //			}
 //		}
-		
+//		
+//		gameState = new int[][] {
+//			{5,3,0,0,7,0,0,0,0},
+//			{6,0,0,1,9,5,0,0,0},
+//			{0,9,8,0,0,0,0,6,0},
+//			{8,0,0,0,6,0,0,0,3},
+//			{4,0,0,8,0,3,0,0,1},
+//			{7,0,0,0,2,0,0,0,6},
+//			{0,6,0,0,0,0,2,8,0},
+//			{2,8,7,4,1,9,6,3,5},
+//			{3,4,5,2,8,6,1,7,9}
+//		};
+//		
 		gameState = new int[][] {
-			{5,3,0,0,7,0,0,0,0},
-			{6,0,0,1,9,5,0,0,0},
-			{0,9,8,0,0,0,0,6,0},
-			{8,0,0,0,6,0,0,0,3},
-			{4,0,0,8,0,3,0,0,1},
-			{7,0,0,0,2,0,0,0,6},
-			{0,6,0,0,0,0,2,8,0},
+			{5,3,4,6,7,8,9,1,2},
+			{6,7,2,1,9,5,3,4,8},
+			{1,9,8,3,4,2,5,6,7},
+			{8,5,9,7,6,1,4,2,3},
+			{4,2,6,8,5,3,7,9,1},
+			{7,1,3,9,2,4,8,5,6},
+			{9,6,1,5,3,7,2,8,4},
 			{2,8,7,4,1,9,6,3,5},
-			{3,4,5,2,8,6,1,7,9}
+			{3,4,5,2,8,6,1,7,0}
 		};
-//		gameState[3][3] = 8;
-//		gameState[1][2] = 2;
+//		int tempGrid[][] = new int[9][9];
+//		
+//		do {
+//		for(int i=0;i<9;i++) {
+//			for(int j=0;j<9;j++) {
+//				tempGrid[i][j] = gameState[i][j];
+//			}
+//		}
+//		
+//		generateRandomGameState(tempGrid);
+//		
+//		}while(!validateBoard(tempGrid));
+//		
+//		gameState = tempGrid;
 //		
 	}
 	
-	private void generateRandomGameState() {
+	private void generateRandomGameState(int grid[][]) {
 		
+		for(int i = 0;i<9;i++) {
+			for(int j=0;j<9;j++) {
+				if(Math.random() > 0.6) grid[i][j] = (int)(Math.random() * 9);
+			}
+		}
+		
+	}
+	
+	private boolean isSolved(int grid[][]) {
+		for(int i=0;i<3;i++){
+			for(int j=0;j<3;j++) {
+				if(getBoxSum(grid,0,0)!=45) return false;
+			}
+		}
+		for(int i=0;i<9;i++) {
+			if(getRowSum(grid,i)!=45) return false;
+		}
+		for(int i=0;i<9;i++) {
+			if(getColumnSum(grid,i)!=45) return false;
+		}
+		return true;
 	}
 
 	/*
@@ -514,6 +492,54 @@ public class Board extends JFrame{
 		return str;
 	}
 
+	private boolean validateBoard(int grid[][]) {
+		for(int i = 0;i<9;i++) {
+			for(int j = 0;j<9;j++) {
+				if(grid[i][j]!= 0) {
+					if(existsInRow(grid,i,j,grid[i][j]) 
+				    || existsInColumn(grid,i,j,grid[i][j])
+					|| existsInBox(grid,i,j,grid[i][j])) return  false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	private boolean existsInRow(int[][] grid,int row,int col,int value) {
+		for(int j=0;j<9;j++) {
+			if(col != j) {
+				if(grid[row][j] == value) return true; 
+			}
+		}
+		return false;
+	}
+	
+	private boolean existsInColumn(int[][] grid,int row,int col,int value) {
+		for(int i=0;i<9;i++) {
+			if(row != i) {
+				if(grid[i][col] == value) return true; 
+			}
+		}
+		return false;
+	}
+	
+	private boolean existsInBox(int[][] grid,int row,int col, int value) {
+		int x = 3 * (row/3);
+		int y = 3 * (col/3);
+		
+		for(int i=x;i<x+3;i++) {
+			for(int j=y;j<y+3;j++) {
+				if(i!=row || col!=j) {
+					if(grid[i][j]== value) return true;
+				}
+			}
+			
+		}
+		
+		
+		return false;
+	}
+	
 	public static void main(String[] args) {
 		Board board = new Board();
 		System.out.println(board);
@@ -543,16 +569,7 @@ public class Board extends JFrame{
 		}
 	}
 
-	@SuppressWarnings("unused")
-	private void AC3(int[] domain){
-		Queue<Integer> q = new LinkedList<Integer>();
-		for(int i=0;i<9;i++	) {
-			q.add(domain[i]);
-		}
-		while(!q.isEmpty()) {
-
-		}
-	}
+	
 
 
 
