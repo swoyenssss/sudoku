@@ -23,4 +23,13 @@ public class Coordinate {
 	public void setY(int y) {
 		this.y = y;
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if(other instanceof Coordinate) {
+			Coordinate other2 = (Coordinate)other;
+			if(this.x==other2.x && this.y==other2.y) return true;
+		}
+		return false;
+	}
 }
